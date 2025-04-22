@@ -1,0 +1,14 @@
+<RCC version="1.0">
+<qresource>
+
+    <file>../resources/holy_sight.png</file>
+    <file>../resources/holy_sight.ico</file>
+    <file>../resources/move_cursor.png</file>
+    <file>../resources/icon_1.png</file>
+    <file>../resources/icon_2.png</file>
+    <file>../resources/icon_3.png</file>
+
+</qresource>
+</RCC>
+
+<!-- pyside6-rcc icons.qrc -o icons.py -->
