@@ -253,6 +253,7 @@ class SystemTrayMenu(QMenu):
     def _adjust_crosshair_border(self, value: int) -> None:
         """Adjust the border thickness of the crosshair"""
         self.crosshair.setStyleSheet(self.crosshair.styleSheet() + f"border: {value}px solid {self._ch_border_color};")
+        self._ch_border_thickness = value  # update this as well
         self.parent().ch_border_thickness = value
 
     def set_custom_img(self) -> None:
