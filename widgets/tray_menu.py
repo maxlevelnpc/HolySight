@@ -155,6 +155,7 @@ class SystemTrayMenu(QMenu):
                 """
             )
             self.crosshair.setStyleSheet(self.crosshair.styleSheet() + f"background-color: {color.name()};")
+            self._ch_color = color.name()
             self.parent().ch_color = color.name()
 
     def open_ch_border_color_picker(self) -> None:
@@ -174,6 +175,7 @@ class SystemTrayMenu(QMenu):
             self.crosshair.setStyleSheet(
                 self.crosshair.styleSheet() + f"border: {self._ch_border_thickness}px solid {color.name()};"
             )
+            self._ch_border_color = color.name()
             self.parent().ch_border_color = color.name()
 
     def _create_sizer_slider(self) -> QWidget:
@@ -227,6 +229,7 @@ class SystemTrayMenu(QMenu):
     def _adjust_crosshair_size(self, value: int) -> None:
         size = value
         border_radius = size // 2
+        self._ch_size = size
         self.parent().ch_size = size
 
         self.crosshair.setFixedSize(size, size)
@@ -248,12 +251,13 @@ class SystemTrayMenu(QMenu):
         """Adjust the crosshair opacity based on the slider value"""
         opacity = value / 255  # Convert the slider value (0-255) to a float (0.0 - 1.0)
         self.parent().setWindowOpacity(opacity)
+        self._ch_opacity = opacity
         self.parent().ch_opacity = opacity
 
     def _adjust_crosshair_border(self, value: int) -> None:
         """Adjust the border thickness of the crosshair"""
         self.crosshair.setStyleSheet(self.crosshair.styleSheet() + f"border: {value}px solid {self._ch_border_color};")
-        self._ch_border_thickness = value  # update this as well
+        self._ch_border_thickness = value
         self.parent().ch_border_thickness = value
 
     def set_custom_img(self) -> None:
