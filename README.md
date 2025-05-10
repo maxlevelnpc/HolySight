@@ -1,7 +1,12 @@
-![holy_sight](https://github.com/user-attachments/assets/81e9d5cd-0008-4f13-a1c6-035cc81504be)
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/81e9d5cd-0008-4f13-a1c6-035cc81504be" alt="app_icon" width="100"/>
+</p>
 
-# HolySight
-HolySight is a lightweight crosshair overlay made with PySide6.
+<h1 align="center">HolySight</h1>
+
+<p align="center">
+  HolySight is a lightweight crosshair overlay made with PySide6
+</p>
 
 ## Features
 - Adjust crosshair size, opacity, color, and border
