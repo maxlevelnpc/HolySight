@@ -146,7 +146,6 @@ class SettingsView(QWidget):
         """)
 
     def apply_shadow(self, widget, color="#181818", blur=20, offset=(0, 0)):
-        """Quickly adds a drop shadow to any widget."""
         shadow = QGraphicsDropShadowEffect(widget)
         shadow.setBlurRadius(blur)
         shadow.setXOffset(offset[0])
