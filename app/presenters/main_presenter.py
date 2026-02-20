@@ -89,11 +89,12 @@ class MainPresenter:
     
     def reposition_crosshair(self) -> None:
         """Move crosshair to saved coord pos or center it"""
+        INVALID_POS = 99999
         x, y = self.model.pos
 
-        # TODO: change the values in json
-        # for the first time user open the app. or any beter way
-        if x > 6666 or y > 6666:
+        # Detect first-run or invalid saved position using sentinel values.
+        # If detected, center the window instead of restoring coordinates.
+        if x >= INVALID_POS or y >= INVALID_POS:
             reposition_window(self.ui, True)
         else:
             self.ui.move(x, y)
