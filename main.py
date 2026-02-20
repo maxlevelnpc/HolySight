@@ -16,6 +16,9 @@ setup_logging()
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
+    app.setOrganizationName("MaxLevelNPC")
+    app.setApplicationName("HolySight")
+    
     app.setQuitOnLastWindowClosed(False)
 
     service = ConfigService()
