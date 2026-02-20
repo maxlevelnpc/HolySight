@@ -1,8 +1,12 @@
-![HolySight Preview](resources/holy_sight.png)
+<p align="center">
+  <img src="app/assets/icons/holy_sight.png" width="120" alt="HolySight Icon">
+</p>
 
+<h1 align="center">HolySight</h1>
 
-# HolySight
-HolySight is a lightweight crosshair overlay made with PySide6.
+<p align="center">
+A simple and lightweight crosshair overlay.
+</p>
 
 ## Features
 - Adjust crosshair size, opacity, color, and border
@@ -10,18 +14,18 @@ HolySight is a lightweight crosshair overlay made with PySide6.
 - Minimalist design 
 
 ## Installation
-- Download zip file from release page and extract it
-- Locate `HolySight.exe` and open it.
-It's portable app so no installation needed.
+1. Download the ZIP file from the Releases page  
+2. Extract it  
+3. Open `HolySight.exe` 
 
 ## Usage
-![HolySight Preview](resources/holy_sight_tray.png)
+![HolySight Settings](app/assets/preview.png)
 
-When you open the app, youll see the crosshair and a settings window.
-You can configure your crosshair such as the color and size. You also can load an image as the crosshair.
-
-
-![HolySight Preview](resources/preview.gif)
+When you launch the app, a crosshair will appear on your screen along with the Settings window.
+From the Settings panel, you can:
+- Customize the crosshair color
+- Adjust its size
+- Load a custom image to use as your crosshair
 
 ## License
 MIT License. See [LICENSE](LICENSE).
