@@ -1,0 +1,126 @@
+* {
+    color: white;
+    border: none;
+    outline: none;
+    font-family: Segoe UI;
+}
+
+QWidget {
+    background: transparent;
+    border-radius: 0px;
+}
+
+QWidget#WIN_settings {
+    background: qlineargradient(
+        x1:0, y1:0, x2:0, y2:1,
+        stop:0 #1c2028,
+        stop:1 #1a2032
+    );
+}
+
+
+/* ---------------------------------------------------------------- */
+
+
+QLabel {
+    background: transparent;
+    font-size: 10px;
+}
+
+QPushButton {
+    background-color: #262b3d;
+    border: none;
+    border-radius: 4px;
+    padding: 4px;
+}
+QPushButton:hover {
+    background-color: #2b3144;
+}
+QPushButton:disabled {
+    color: #a7a7a7;
+}
+
+QPushButton#colorPickerBtn {
+    color: #000000;
+    background-color: #262b3d;
+    border: none;
+    border-radius: 4px;
+}
+
+QPushButton#setImageBtn {
+    background-color: #262b3d;
+    border: 2px solid #0078d4;
+    border-radius: 0px;
+}
+QPushButton#setImageBtn:hover {
+    background-color: #2b3144;
+}
+
+QLabel {
+    background: transparent;
+    font-size: 10px;
+}
+
+QLabel#infoLabel {
+    background: transparent;
+    font-size: 9px;
+}
+
+QToolTip {
+    color: #181818;
+    background-color: #1880c2;
+    border: none;
+    border-radius: 0px;
+    font-size: 12px;
+}
+
+QMenu {
+    background-color: #1b202e;
+    color: white;
+    padding: 4px;
+    border: 1px solid #353535;
+    border-radius: 0px;
+}
+QMenu::icon {
+    padding-left: 6px;
+}
+QMenu::item {
+    padding: 6px 12px;
+    background-color: transparent;
+    color: white;
+}
+QMenu::item:hover {
+    background-color: #262b3c;
+}
+QMenu::item:selected {
+    background-color: #262b3c;
+}
+
+QMenu::separator {
+    height: 1.5px;
+    background: #434c6a;
+    margin: 2px 0;
+    padding: 0;
+}
+
+QMenu::item:disabled {
+    color: gray;
+    background: transparent;
+}
+
+QMessageBox {
+    background: #1a2032;
+}
+
+QPushButton#iconBtn {
+    background-color: #262b3d;
+    border: none;
+    border-radius: 11px;
+}
+QPushButton#iconBtn:hover {
+    background-color: #2b3144;
+}
+
+QSlider {
+    outline: none;
+}
