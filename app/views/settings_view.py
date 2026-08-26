@@ -3,12 +3,12 @@ import logging
 from typing import TYPE_CHECKING
 
 from PySide6.QtGui import QIcon
-from PySide6.QtCore import QEvent, Qt, Slot, QSize
+from PySide6.QtCore import Qt, Slot, QSize
 from PySide6.QtWidgets import (
     QFormLayout, QVBoxLayout, QHBoxLayout, QLabel, QWidget, QPushButton, QMessageBox, QGraphicsDropShadowEffect
 )
 
-from app.widgets import Slider
+from app.widgets import Slider, ImageDropButton
 from app.core.types import CrosshairMode
 
 if TYPE_CHECKING:
@@ -28,7 +28,6 @@ class SettingsView(QWidget):
         self.setWindowTitle(" ")
         self.setWindowIcon(QIcon(":/app/assets/icons/holy_sight.png"))
         self.setFixedSize(200, 350)
-        # self.setWindowOpacity(0.95)
         self.setObjectName("WIN_settings")
         self.setWindowFlag(Qt.WindowType.WindowStaysOnTopHint)
 
@@ -77,9 +76,8 @@ class SettingsView(QWidget):
         self.crosshair_form_layout.addRow("Border Size", self.border_slider)
         self.crosshair_form_layout.addRow("Border Color", self.border_color_preview)
 
-        self.image_preview = QPushButton()
+        self.image_preview = ImageDropButton()
         self.image_preview.setText("Set\nImage")
-        self.image_preview.setFixedSize(60, 60)
         self.image_preview.setObjectName("setImageBtn")
 
         self.info_label = QLabel()
@@ -115,7 +113,7 @@ class SettingsView(QWidget):
         self.apply_shadow(self.hide_btn, offset=(0, 2))
         self.apply_shadow(self.image_preview, color="#10276d", blur=30)
 
-    def show_app_info(self):
+    def show_app_info(self) -> None:
         QMessageBox.information(
             self,
             "Info",
@@ -169,7 +167,7 @@ class SettingsView(QWidget):
             }}
         """)
 
-    def apply_shadow(self, widget, color="#181818", blur=20, offset=(0, 0)):
+    def apply_shadow(self, widget, color="#181818", blur=20, offset=(0, 0)) -> None:
         shadow = QGraphicsDropShadowEffect(widget)
         shadow.setBlurRadius(blur)
         shadow.setXOffset(offset[0])

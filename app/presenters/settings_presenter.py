@@ -8,7 +8,7 @@ from PySide6.QtGui import Qt, QIcon
 from PySide6.QtCore import Slot
 
 from app.core.types import CrosshairMode
-
+from app.core.constants import SUPPORTED_EXTS
 
 if TYPE_CHECKING:
     from app.views import SettingsView
@@ -18,7 +18,7 @@ log = logging.getLogger(__name__)
 
 
 class SettingsPresenter:
-    def __init__(self, model: CrosshairModel, ui: SettingsView):
+    def __init__(self, model: CrosshairModel, ui: SettingsView) -> None:
         super().__init__()
         self.model = model
         self.ui = ui
@@ -36,6 +36,7 @@ class SettingsPresenter:
         self.ui.info_dialog.clicked.connect(self.ui.show_app_info)
         self.ui.color_preview.clicked.connect(self.open_color_picker)
         self.ui.image_preview.clicked.connect(self.open_image_picker)
+        self.ui.image_preview.imageDropped.connect(self.set_crosshair_img)
         self.ui.border_color_preview.clicked.connect(lambda: self.open_color_picker(border=True))
         self.ui.move_crosshair.clicked.connect(lambda: self.ui.on_crosshair_mode_changed(CrosshairMode.MOVE))
         self.ui.hide_btn.clicked.connect(self.set_crosshair_visibility)
@@ -45,7 +46,7 @@ class SettingsPresenter:
 
         self.apply_settings()
 
-    def apply_settings(self):
+    def apply_settings(self) -> None:
         """Apply settings from loaded config data"""
         color = self.model.color
         img = self.model.image
@@ -68,7 +69,7 @@ class SettingsPresenter:
             self.ui.image_preview.setToolTip("Click to reset.")
 
     @Slot(bool)
-    def open_color_picker(self, border: bool = False):
+    def open_color_picker(self, border: bool = False) -> None:
         color_picker = QColorDialog.getColor(
             parent=self.ui,
             title="Select Border Color" if border else "Select Color"
@@ -98,21 +99,24 @@ class SettingsPresenter:
             self.model.image = ""
             return
 
+        spaced_exts = " ".join(f"*.{ext}" for ext in SUPPORTED_EXTS)
+        ext_filter = f"All Files ({spaced_exts});;"
         img, _ = QFileDialog.getOpenFileName(
             self.ui,
             "Choose Crosshair Image",
-            filter=(
-                "All Files (*.png *.jpg *.jpeg *.svg *.bmp *.gif *.webp);;"
-            )
+            filter=ext_filter
         )
 
         if img:
-            self.set_preview_icon(img)
-            self.model.image = img
-            self.on_crosshair_image_set(disable=True)
-            self.ui.image_preview.setToolTip("Click to reset.")
-            self.ui.image_preview.setCursor(Qt.CursorShape.PointingHandCursor)
-            log.debug("Image picker: Crosshair image has been set.")
+            self.set_crosshair_img(img)
+
+    def set_crosshair_img(self, img: str) -> None:
+        self.set_preview_icon(img)
+        self.model.image = img
+        self.on_crosshair_image_set(disable=True)
+        self.ui.image_preview.setToolTip("Click to reset.")
+        self.ui.image_preview.setCursor(Qt.CursorShape.PointingHandCursor)
+        log.debug("Image picker: Crosshair image has been set.")
 
     def set_preview_icon(self, img: str) -> None:
         if not os.path.exists(img):
