@@ -118,9 +118,21 @@ QPushButton#iconBtn {
     border-radius: 11px;
 }
 QPushButton#iconBtn:hover {
-    background-color: #2b3144;
+    background-color: #898b90;
 }
 
-QSlider {
-    outline: none;
+QSlider::groove:horizontal {
+    height: 4px;
+    background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #B1B1B1, stop:1 #c4c4c4);
+    margin: 2px 0;
+}
+QSlider::handle:horizontal {
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:1, stop:0 #008dc4, stop:1 #49bfee);
+    width: 8px;
+    height: 8px;
+    margin: -2px 0;
+    border-radius: 2px;
+}
+QSlider::handle:horizontal:disabled {
+    background: transparent;
 }
