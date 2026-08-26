@@ -39,10 +39,10 @@ class MainPresenter:
         self.ui.windowPositionChanged.connect(lambda v: setattr(self.model, "pos", v))
         self.ui.bus.stateChanged.connect(self.ui.update_crosshair_state)
         self.ui.bus.crosshairVisibilityChanged.connect(self.ui.update_crosshair_visibility)
-        self.ui.bus.activateMainWindow.connect(self.ui.activate_window)
         self.ui.bus.centerMainWindow.connect(lambda: reposition_window(self.ui))
         self.ui.tray_crosshair_settings.triggered.connect(self.ui.bus.showSettingsWindow)
         self.ui.tray_exit_app.triggered.connect(self.ui.quit_app)
+        self.ui.tray_icon.activated.connect(self.ui.show_tray_menu)
         QApplication.instance().aboutToQuit.connect(self.save_settings)
 
         QTimer.singleShot(300, lambda: self.ui.crosshair.setVisible(True))
@@ -65,12 +65,12 @@ class MainPresenter:
         else:
             self.ui.set_crosshair_style(self.model.get_style_req)
             log.debug(f"Set crosshair Color: {color}, BColor: {bcolor} and BSize: {bsize}.")
-            
+
         self.ui.setWindowOpacity(opacity)
         log.debug(f"Set crosshair opacity: `{opacity}`")
 
         self.reposition_crosshair()
-        log.debug(f"Crosshair repositioned. Position resolved.\n")
+        log.debug("Crosshair repositioned. Position resolved.\n")
 
     @Slot()
     def save_settings(self) -> None:
@@ -86,7 +86,7 @@ class MainPresenter:
             "ch_pos": self.ui.pos().toTuple()
         }
         self.model.service.save_config_data(config_data)
-    
+
     def reposition_crosshair(self) -> None:
         """Move crosshair to saved coord pos or center it"""
         INVALID_POS = 99999

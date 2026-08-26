@@ -3,10 +3,9 @@ import logging
 from typing import Optional, TYPE_CHECKING
 
 from PySide6.QtWidgets import QSystemTrayIcon, QApplication, QVBoxLayout, QMenu, QWidget
-from PySide6.QtGui import QIcon, QAction
+from PySide6.QtGui import QCloseEvent, QIcon, QAction, QCursor
 from PySide6.QtCore import Qt, QPoint, Slot, Signal
 
-from app.core.bus import AppBus
 from app.core.utils import reposition_window
 from app.core.types import CrosshairMode
 from app.widgets import CrosshairWidget
@@ -36,12 +35,10 @@ class MainView(QWidget):
         self.setFixedSize(500, 500)
         self.setObjectName("WIN_main")
 
-        self.setWindowFlags(
-            Qt.WindowType.Tool | 
-            Qt.WindowType.FramelessWindowHint | 
-            Qt.WindowType.WindowStaysOnTopHint |  # stay on top + prevent Tool window to close 
-            Qt.WindowType.WindowTransparentForInput  # click-thru
-        )
+        self.setWindowFlag(Qt.WindowType.Tool)
+        self.setWindowFlag(Qt.WindowType.FramelessWindowHint)
+        self.setWindowFlag(Qt.WindowType.WindowStaysOnTopHint)  # stay on top + prevent Tool window to close
+        self.setWindowFlag(Qt.WindowType.WindowTransparentForInput)  # click-thru
 
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
 
@@ -89,13 +86,20 @@ class MainView(QWidget):
         log.debug(f"Update crosshair image: {img}")
 
     @Slot(float)
-    def update_crosshair_opacity(self, opacity: float) -> None:
+    def update_crosshair_opacity(self, opacity: int) -> None:
         self.setWindowOpacity(opacity)
         log.debug(f"Update crosshair opacity: {opacity}")
 
     @Slot(str)
     def update_crosshair_state(self, mode: CrosshairMode) -> None:
-        self.set_input_transparency(False if mode == CrosshairMode.MOVE else True)
+        if mode == CrosshairMode.MOVE:
+            self.set_input_transparency(False)
+            self.setCursor(Qt.CursorShape.SizeAllCursor)
+            self.activateWindow()
+        else:
+            self.set_input_transparency(True)
+            self.unsetCursor()
+
         self.bus.crosshairMode = mode
         log.debug(f"Update crosshair state. Crosshair is now `{mode}`")
 
@@ -117,9 +121,9 @@ class MainView(QWidget):
         c = self.crosshair
         c.setVisible(False) if c.isVisible() else c.setVisible(True)
 
-    @Slot()
-    def activate_window(self) -> None:
-        self.activateWindow()
+    def show_tray_menu(self, reason):
+        if reason == QSystemTrayIcon.ActivationReason.Trigger:
+            self.tray_menu.popup(QCursor.pos())
 
     @Slot()
     def quit_app(self) -> None:
@@ -128,9 +132,10 @@ class MainView(QWidget):
         QApplication.quit()
 
     def _window_pos_as_crosshair(self) -> tuple[int, int]:
-        x = self.pos().x() + self.size().width() // 2 - self.crosshair.size().width() // 2
-        y = self.pos().y() + self.size().height() // 2 - self.crosshair.size().height() // 2
-        return x, y
+        center_x = self.pos().x() + (self.size().width() // 2)
+        center_y = self.pos().y() + (self.size().height() // 2)
+
+        return center_x, center_y
 
     def _set_visual_coord(self):
         rpos = self._window_pos_as_crosshair()
@@ -172,7 +177,6 @@ class MainView(QWidget):
 
         if event.key() in (Qt.Key.Key_Return, Qt.Key.Key_Escape):
             # set WindowTransparentForInput flag to flase
-            self.update_crosshair_state(CrosshairMode.GAME)
             self.bus.stateChangedFinished.emit()
 
         # move window with arrow keys

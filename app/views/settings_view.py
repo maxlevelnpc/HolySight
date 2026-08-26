@@ -21,7 +21,7 @@ class SettingsView(QWidget):
     def __init__(self, bus: AppBus) -> None:
         super().__init__()
         self.bus = bus
-        
+
         self.setupUI()
 
     def setupUI(self) -> None:
@@ -30,6 +30,7 @@ class SettingsView(QWidget):
         self.setFixedSize(200, 350)
         # self.setWindowOpacity(0.95)
         self.setObjectName("WIN_settings")
+        self.setWindowFlag(Qt.WindowType.WindowStaysOnTopHint)
 
         self.main_layout = QVBoxLayout(self)
         self.main_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -50,7 +51,7 @@ class SettingsView(QWidget):
         self.crosshair_coord_layout.addWidget(self.info_dialog)
 
         self.crosshair_form_layout = QFormLayout()
-        
+
         self.color_preview = QPushButton()
         self.color_preview.setFixedHeight(30)
         self.color_preview.setCursor(Qt.CursorShape.PointingHandCursor)
@@ -60,7 +61,7 @@ class SettingsView(QWidget):
         self.sizer_slider.setRange(5, 200)
 
         self.opacity_slider = Slider(opacity_mode=True)
-        self.opacity_slider.setRange(0, 255)
+        self.opacity_slider.setRange(0, 10)
 
         self.border_slider = Slider()
         self.border_slider.setRange(0, 10)
@@ -87,9 +88,9 @@ class SettingsView(QWidget):
         self.info_label.setVisible(False)
         self.info_label.setObjectName("infoLabel")
         self.text_info = (
-                    "Drag the crosshair or use the arrow keys to move it. "
-                    "Double-click or press <b>Ctrl+Alt+C</b> to center."
-                )
+            "Drag the crosshair or use the arrow keys to move it. "
+            "Double-click or press <b>Ctrl+Alt+C</b> to center."
+        )
 
         self.move_crosshair = QPushButton("Move Crosshair")
         self.move_crosshair.setFixedHeight(25)
@@ -116,8 +117,8 @@ class SettingsView(QWidget):
 
     def show_app_info(self):
         QMessageBox.information(
-            self, 
-            "Info", 
+            self,
+            "Info",
             "<b>APP SHORTCUTS</b><br><br>"
             "<b>Ctrl + Alt + X</b>  Toggle visibility<br>"
             "<b>Ctrl + Alt + C</b>  Center crosshair"
@@ -126,9 +127,32 @@ class SettingsView(QWidget):
     def show_window(self) -> None:
         if not self.isVisible():
             self.show()
-        
+
         if self.isMinimized():
             self.showNormal()
+
+    @Slot()
+    def on_crosshair_mode_changed(self, mode: CrosshairMode) -> None:
+        """Update crosshair state"""
+        self.bus.stateChanged.emit(mode)
+
+        if mode == CrosshairMode.MOVE:
+            # Tell main window to make crosshair moveable
+            self.setFixedSize(200, 400)
+            self.info_label.setVisible(True)
+            self.move_crosshair.setText("(Press Enter to exit)")
+            self.move_crosshair.setDisabled(True)
+            self.setCursor(Qt.CursorShape.SizeAllCursor)
+            self.bus.crosshairMode = CrosshairMode.MOVE
+        else:
+            self.info_label.setVisible(False)
+            self.setFixedSize(200, 350)
+            self.move_crosshair.setText("Move Crosshair")
+            self.move_crosshair.setDisabled(False)
+            self.unsetCursor()
+            self.bus.crosshairMode = CrosshairMode.GAME
+
+        self.info_label.setText(self.text_info)
 
     @Slot(int, int)
     def update_visual_coord(self, pos: tuple) -> None:
@@ -138,8 +162,8 @@ class SettingsView(QWidget):
 
     def set_color_picker_btn_style(self, btn: QPushButton, color: str, bg_color: str) -> None:
         btn.setStyleSheet(f"""
-            QPushButton#colorPickerBtn {{ 
-                color: {color}; 
+            QPushButton#colorPickerBtn {{
+                color: {color};
                 background-color: {bg_color};
                 font-weight: bold;
             }}
@@ -157,13 +181,11 @@ class SettingsView(QWidget):
         super().keyPressEvent(event)
         if event.key() in (Qt.Key.Key_Return, Qt.Key.Key_Escape):
             if self.bus.crosshairMode == CrosshairMode.MOVE:
-                self.info_label.setText("Press Enter again to exit move mode...")
-                log.debug("Main Window is now activated.")
-                self.bus.activateMainWindow.emit()
-    
-    def changeEvent(self, event: QEvent) -> None:
-        super().changeEvent(event)
-        if event.type() == QEvent.Type.ActivationChange:
-            if self.isActiveWindow() and self.bus.crosshairMode == CrosshairMode.MOVE:
-                self.info_label.setText(self.text_info)
-                log.debug("Settings Window Activated.")
+                self.on_crosshair_mode_changed(CrosshairMode.GAME)
+                log.debug("Enter key pressed. Exit Move Mode.")
+
+    def closeEvent(self, event) -> None:
+        super().closeEvent(event)
+        if self.bus.crosshairMode == CrosshairMode.MOVE:
+            self.on_crosshair_mode_changed(CrosshairMode.GAME)
+            log.debug("Settings window closed. Exit Move Mode.")
