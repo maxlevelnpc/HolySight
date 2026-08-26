@@ -1,22 +1,24 @@
+# python
 __pycache__/
 *.py[doc]
-.env
-venv/
 .venv/
+venv/
 
+# vscode
 .vscode/
-.idea/
-*.sw[pon]
+*.code-workspace
 
+# windows
 desktop.ini
 Thumbs.db
-.DS_Store
 
-build/
-dist/
+# local
+.env
 *.log
+*.build/
+*.dist/
 .scripts/
-scripts/
+.tools/
 quicknotes.*
+demo.py
 test.py
-test[1-69].py
