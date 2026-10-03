@@ -9,17 +9,17 @@ A simple and lightweight crosshair overlay.
 </p>
 
 ## Features
-- Adjust crosshair size, opacity, color, and border
+- Adjust crosshair size, opacity, color
 - Load custom images (PNG, JPG etc.)
 - Minimalist design 
 
 ## Installation
-1. Download the ZIP file from the Releases page  
-2. Extract it  
-3. Open `HolySight.exe` 
+1. Download `HolySight_v1.2.0_Setup.exe` from the [Releases](https://github.com/MaxLevelNPC/HolySight/releases) page.
+2. Run the installer and follow the setup wizard.
+3. Launch **HolySight** from your Desktop or Start Menu.
 
 ## Usage
-<img src="app/assets/preview.png" width="400" alt="HolySight Icon">
+<img src="app/assets/settings.png" width="400" alt="HolySight Icon">
 
 When you launch the app, a crosshair will appear on your screen along with the Settings window.
 From the Settings panel, you can:

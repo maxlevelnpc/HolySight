@@ -1,4 +1,6 @@
 import sys
+import os
+from pathlib import Path
 
 from PySide6.QtWidgets import QApplication
 
@@ -11,7 +13,12 @@ from app.core.utils import setup_logging, load_style
 
 from app.assets import res_rc
 
-setup_logging()
+
+log_dir = Path(os.environ["LOCALAPPDATA"]) / "MaxLevelNPC" / "HolySight"
+log_dir.mkdir(parents=True, exist_ok=True)
+log_file = log_dir / "app.log"
+
+setup_logging(log_file)
 
 
 if __name__ == '__main__':
