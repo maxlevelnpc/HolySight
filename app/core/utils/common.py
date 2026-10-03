@@ -6,7 +6,7 @@ def setup_logging() -> None:
     root.setLevel(logging.DEBUG)
 
     formatter = logging.Formatter(
-        f"[%(levelname)s] %(asctime)s | %(name)s | Ln. %(lineno)d %(funcName)s -> %(message)s",
+        "[%(levelname)s] %(asctime)s | %(name)s | Ln. %(lineno)d %(funcName)s -> %(message)s",
         "%Y-%m-%d %I:%M:%S %p"
     )
 

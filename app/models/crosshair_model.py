@@ -3,13 +3,14 @@ from app.core.services import ConfigService
 
 
 class CrosshairModel(QObject):
-    colorChanged = Signal(object)
+    colorChanged = Signal(str)
     sizeChanged = Signal(int)
     opacityChanged = Signal(float)
-    imageChanged = Signal(str, object)
-    borderColorChanged = Signal(object)
-    borderSizeChanged = Signal(object)
+    imageChanged = Signal(str)
     positionChanged = Signal(tuple)
+
+    moveModeChanged = Signal(bool)
+    visibilityChanged = Signal(bool)
 
     def __init__(self, config_service: ConfigService) -> None:
         super().__init__()
@@ -19,9 +20,10 @@ class CrosshairModel(QObject):
         self._size: int
         self._opacity: float
         self._image: str
-        self._bcolor: str
-        self._bsize: int
         self._pos: tuple
+
+        self._is_movable: bool = False
+        self._is_hidden: bool = False
 
     def load_config(self) -> None:
         config_data = self.service.load_config_data()
@@ -29,12 +31,7 @@ class CrosshairModel(QObject):
         self._size = config_data["ch_size"]
         self._opacity = config_data["ch_opacity"]
         self._image = config_data["ch_image"]
-        self._bcolor = config_data["ch_bcolor"]
-        self._bsize = config_data["ch_bsize"]
         self._pos = tuple(config_data["ch_pos"])
-
-    def get_style_req(self) -> tuple[str, int, str, int]:
-        return self._color, self._size, self._bcolor, self._bsize
 
     @property
     def color(self) -> str:
@@ -43,7 +40,7 @@ class CrosshairModel(QObject):
     @color.setter
     def color(self, color: str) -> None:
         self._color = color
-        self.colorChanged.emit(self.get_style_req)
+        self.colorChanged.emit(color)
 
     @property
     def size(self) -> int:
@@ -71,25 +68,7 @@ class CrosshairModel(QObject):
     @image.setter
     def image(self, image: str) -> None:
         self._image = image
-        self.imageChanged.emit(image, self.get_style_req)
-
-    @property
-    def bcolor(self) -> str:
-        return self._bcolor
-
-    @bcolor.setter
-    def bcolor(self, bcolor: str) -> None:
-        self._bcolor = bcolor
-        self.borderColorChanged.emit(self.get_style_req)
-
-    @property
-    def bsize(self) -> int:
-        return self._bsize
-
-    @bsize.setter
-    def bsize(self, bsize: int) -> None:
-        self._bsize = bsize
-        self.borderSizeChanged.emit(self.get_style_req)
+        self.imageChanged.emit(image)
 
     @property
     def pos(self) -> tuple[int, int]:
@@ -99,3 +78,21 @@ class CrosshairModel(QObject):
     def pos(self, pos: tuple[int, int]) -> None:
         self._pos = pos
         self.positionChanged.emit(pos)
+
+    @property
+    def movable(self) -> bool:
+        return self._is_movable
+
+    @movable.setter
+    def movable(self, movable: bool) -> None:
+        self._is_movable = movable
+        self.moveModeChanged.emit(movable)
+
+    @property
+    def hidden(self) -> bool:
+        return self._is_hidden
+
+    @hidden.setter
+    def hidden(self, hidden: bool) -> None:
+        self._is_hidden = hidden
+        self.visibilityChanged.emit(hidden)

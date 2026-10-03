@@ -15,20 +15,15 @@ DEFAULT_CONFIG: Final[ConfigData] = {
     "ch_size": 20,
     "ch_opacity": 1.0,
     "ch_image": "",
-    "ch_bcolor": "#0078cf",
-    "ch_bsize": 0,
     "ch_pos": (99999, 99999)
 }
 
 
 class ConfigService:
     def __init__(self) -> None:
-        config_dir = Path(
-            QStandardPaths.writableLocation(QStandardPaths.StandardLocation.AppConfigLocation)
-        )
-        config_dir.mkdir(parents=True, exist_ok=True)
-
-        self.cfg_path = config_dir / "settings.json"        
+        cfg_dir = Path(QStandardPaths.writableLocation(QStandardPaths.StandardLocation.AppConfigLocation))
+        cfg_dir.mkdir(parents=True, exist_ok=True)
+        self.cfg_path = cfg_dir / "settings.json"
 
     def load_config_data(self) -> ConfigData:
         if not self.cfg_path.exists():

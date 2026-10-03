@@ -3,7 +3,7 @@ from PySide6.QtCore import Qt, QPoint, QTimer
 
 
 class Slider(QSlider):
-    def __init__(self, parent=None, opacity_mode=False):
+    def __init__(self, parent=None, opacity_mode: bool = False) -> None:
         super().__init__(parent)
         self.setOrientation(Qt.Orientation.Horizontal)
         self.opacity_mode = opacity_mode
@@ -17,7 +17,7 @@ class Slider(QSlider):
 
         self.sliderReleased.connect(QToolTip.hideText)
 
-    def _show_tooltip(self, value: int):
+    def _show_tooltip(self, value: int) -> None:
         display_value = f"{value / 10.0:.1f}" if self.opacity_mode else str(value)
 
         opt = QStyleOptionSlider()
@@ -35,7 +35,7 @@ class Slider(QSlider):
         if not self.isSliderDown():
             self._hide_timer.start()
 
-    def focusOutEvent(self, event):
+    def focusOutEvent(self, event) -> None:
         QToolTip.hideText()
         self._hide_timer.stop()
         super().focusOutEvent(event)

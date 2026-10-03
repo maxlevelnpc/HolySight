@@ -1,12 +1,12 @@
 import logging
 
-from PySide6.QtWidgets import QApplication
+from PySide6.QtWidgets import QApplication, QWidget
 from PySide6.QtCore import QFile, QTextStream
 
 log = logging.getLogger(__name__)
 
 
-def reposition_window(window, center=True):
+def reposition_window(window: QWidget, center: bool = True) -> None:
     screen = QApplication.primaryScreen().availableGeometry()
     frame = window.frameGeometry()
 
@@ -20,19 +20,20 @@ def reposition_window(window, center=True):
         y = screen.top() + (screen.height() - frame.height()) // 2 - 60
         window.move(x, y)
 
+
 def load_style(*paths: str) -> str:
     """
-    :returns: combined styles.
+    :returns: combined stylesheet.
     """
-    style = ""
+    stylesheet = ""
 
     for path in paths:
         file = QFile(path)
         if file.open(QFile.OpenModeFlag.ReadOnly | QFile.OpenModeFlag.Text):
             stream = QTextStream(file)
-            style += stream.readAll() + f"\n\n"
+            stylesheet += stream.readAll() + "\n\n"
             file.close()
         else:
             log.critical(f"{file.errorString()} -> `{path}`")
 
-    return style
+    return stylesheet
