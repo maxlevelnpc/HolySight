@@ -24,12 +24,12 @@ if __name__ == '__main__':
     model = CrosshairModel(service)
     bus = AppBus()
     hotkey = HotkeyManager(bus)
-    main_view = MainView(bus, hotkey)
-    settings_view = SettingsView(bus)
-    MainPresenter(model, main_view)
-    SettingsPresenter(model, settings_view)
+    main_view = MainView()
+    settings_view = SettingsView()
+    MainPresenter(hotkey, bus, model, main_view)
+    SettingsPresenter(bus, model, settings_view)
 
-    stylesheet = load_style(":/app/assets/styles/styles.css")
+    stylesheet = load_style(":/styles.css")
     app.setStyleSheet(stylesheet)
 
     main_view.show()

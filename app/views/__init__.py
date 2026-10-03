@@ -1,2 +1,2 @@
-from .main_view import MainView
-from .settings_view import SettingsView
+from app.views.main_view import MainView
+from app.views.settings_view import SettingsView

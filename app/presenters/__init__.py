@@ -1,2 +1,2 @@
-from .main_presenter import MainPresenter
-from .settings_presenter import SettingsPresenter
+from app.presenters.main_presenter import MainPresenter
+from app.presenters.settings_presenter import SettingsPresenter

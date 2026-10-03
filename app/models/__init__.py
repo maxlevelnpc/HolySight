@@ -1,1 +1,1 @@
-from .crosshair_model import CrosshairModel
+from app.models.crosshair_model import CrosshairModel

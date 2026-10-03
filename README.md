@@ -19,7 +19,7 @@ A simple and lightweight crosshair overlay.
 3. Open `HolySight.exe` 
 
 ## Usage
-![HolySight Settings](app/assets/preview.png)
+<img src="app/assets/preview.png" width="400" alt="HolySight Icon">
 
 When you launch the app, a crosshair will appear on your screen along with the Settings window.
 From the Settings panel, you can:
