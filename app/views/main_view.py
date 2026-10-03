@@ -1,37 +1,31 @@
 from __future__ import annotations
 import logging
-from typing import Optional, TYPE_CHECKING
+from typing import Optional
 
-from PySide6.QtWidgets import QSystemTrayIcon, QApplication, QVBoxLayout, QMenu, QWidget
-from PySide6.QtGui import QCloseEvent, QIcon, QAction, QCursor
-from PySide6.QtCore import Qt, QPoint, Slot, Signal
+from PySide6.QtWidgets import QSystemTrayIcon, QVBoxLayout, QMenu, QWidget
+from PySide6.QtGui import QIcon, QAction, QCursor, QPainter, QPen, QColor
+from PySide6.QtCore import Qt, QPoint, Slot, Signal, QRect
 
 from app.core.utils import reposition_window
-from app.core.types import CrosshairMode
 from app.widgets import CrosshairWidget
-
-if TYPE_CHECKING:
-    from app.core.bus import AppBus
-    from app.core.services.hotkey_service import HotkeyManager
 
 log = logging.getLogger(__name__)
 
 
 class MainView(QWidget):
     windowPositionChanged = Signal(tuple)
+    returnPressed = Signal()
 
-    def __init__(self, bus: AppBus, hotkey_manager: HotkeyManager) -> None:
+    def __init__(self) -> None:
         super().__init__()
-        self.bus = bus
-        self.hotkey_manager = hotkey_manager
-
         self.drag_pos: Optional[QPoint] = None
+        self._move_mode_active: bool = False
 
         self.setupUI()
 
-    def setupUI(self):
+    def setupUI(self) -> None:
         self.setWindowTitle("HolySight")
-        self.setWindowIcon(QIcon(":/app/assets/icons/holy_sight.png"))
+        self.setWindowIcon(QIcon(":/holy_sight.png"))
         self.setFixedSize(500, 500)
         self.setObjectName("WIN_main")
 
@@ -58,12 +52,12 @@ class MainView(QWidget):
         # ----------------------------------------------------------------------------
 
         self.tray_icon = QSystemTrayIcon()
-        self.tray_icon.setIcon(QIcon(":/app/assets/icons/holy_sight.png"))
+        self.tray_icon.setIcon(QIcon(":/holy_sight.png"))
         self.tray_icon.setToolTip("HolySight")
 
         self.tray_menu = QMenu()
         self.tray_menu.setObjectName("WIN_trayMenu")
-        self.tray_crosshair_settings = QAction("Open Settings")
+        self.tray_crosshair_settings = QAction("Settings")
         self.tray_menu.addAction(self.tray_crosshair_settings)
         self.tray_menu.addSeparator()
         self.tray_exit_app = QAction("Exit")
@@ -74,15 +68,12 @@ class MainView(QWidget):
     def update_crosshair_size(self, size: int) -> None:
         self.crosshair.setFixedSize(size, size)
         self._set_visual_coord()
+        self.update()
         log.debug(f"Update crosshair size: {size}")
 
-    @Slot(str, object)
-    def update_crosshair_img(self, img: str, data) -> None:
-        self.set_crosshair_img(img)  # path or empty sting
-        if not img:
-            # restyle crosshair after image reset
-            self.set_crosshair_style(data)
-
+    @Slot(str)
+    def set_crosshair_img(self, img: str) -> None:
+        self.crosshair.set_image(img)  # path or empty sting
         log.debug(f"Update crosshair image: {img}")
 
     @Slot(float)
@@ -91,25 +82,18 @@ class MainView(QWidget):
         log.debug(f"Update crosshair opacity: {opacity}")
 
     @Slot(str)
-    def update_crosshair_state(self, mode: CrosshairMode) -> None:
-        if mode == CrosshairMode.MOVE:
+    def update_crosshair_move_state(self, movable) -> None:
+        self._move_mode_active = movable
+        if movable:
             self.set_input_transparency(False)
-            self.setCursor(Qt.CursorShape.SizeAllCursor)
             self.activateWindow()
         else:
             self.set_input_transparency(True)
-            self.unsetCursor()
 
-        self.bus.crosshairMode = mode
-        log.debug(f"Update crosshair state. Crosshair is now `{mode}`")
+        log.debug(f"Update crosshair state. Movable: `{movable}`")
 
-    def set_crosshair_img(self, img : str = "") -> None:
-        self.crosshair.set_image(img)
-
-    @Slot(object)
-    def set_crosshair_style(self, style) -> None:
-        v = style()
-        self.crosshair.set_style(*v)
+    def set_crosshair_color(self, color) -> None:
+        self.crosshair.set_style(color)
 
     def set_input_transparency(self, enable: bool) -> None:
         self.setWindowFlag(Qt.WindowType.WindowTransparentForInput, enable)
@@ -117,19 +101,12 @@ class MainView(QWidget):
         log.debug(f"Window transparency set to: `{enable}`")
 
     @Slot()
-    def update_crosshair_visibility(self) -> None:
-        c = self.crosshair
-        c.setVisible(False) if c.isVisible() else c.setVisible(True)
+    def update_crosshair_visibility(self, hidden) -> None:
+        self.crosshair.setVisible(not hidden)
 
-    def show_tray_menu(self, reason):
+    def show_tray_menu(self, reason) -> None:
         if reason == QSystemTrayIcon.ActivationReason.Trigger:
             self.tray_menu.popup(QCursor.pos())
-
-    @Slot()
-    def quit_app(self) -> None:
-        log.debug("APP QUIT.")
-        self.stop_global_listener()
-        QApplication.quit()
 
     def _window_pos_as_crosshair(self) -> tuple[int, int]:
         center_x = self.pos().x() + (self.size().width() // 2)
@@ -137,24 +114,18 @@ class MainView(QWidget):
 
         return center_x, center_y
 
-    def _set_visual_coord(self):
+    def _set_visual_coord(self) -> None:
         rpos = self._window_pos_as_crosshair()
         self.windowPositionChanged.emit(rpos)
-
-    def stop_global_listener(self):
-        self.hotkey_manager.stop()
 
     # ----------------------------------------------------------------------------
 
     def mousePressEvent(self, event) -> None:
+        super().mousePressEvent(event)
         if event.button() == Qt.MouseButton.LeftButton:
             if self.crosshair.geometry().contains(event.position().toPoint()):
                 self.drag_pos = event.globalPosition().toPoint() - self.pos()
                 event.accept()
-            else:
-                super().mousePressEvent(event)
-        else:
-            super().mousePressEvent(event)
 
     def mouseMoveEvent(self, event) -> None:
         super().mouseMoveEvent(event)
@@ -176,11 +147,11 @@ class MainView(QWidget):
         pos = self.pos()
 
         if event.key() in (Qt.Key.Key_Return, Qt.Key.Key_Escape):
-            # set WindowTransparentForInput flag to flase
-            self.bus.stateChangedFinished.emit()
+            self.returnPressed.emit()
+            log.debug("[MainWindow] Enter key pressed. Exit Move Mode.")
 
         # move window with arrow keys
-        elif event.key() == Qt.Key.Key_Left:
+        if event.key() == Qt.Key.Key_Left:
             self.move(pos - QPoint(step, 0))
             self._set_visual_coord()
         elif event.key() == Qt.Key.Key_Up:
@@ -192,3 +163,31 @@ class MainView(QWidget):
         elif event.key() == Qt.Key.Key_Down:
             self.move(pos + QPoint(0, step))
             self._set_visual_coord()
+
+    def paintEvent(self, event) -> None:
+        super().paintEvent(event)
+
+        if self._move_mode_active:
+            painter = QPainter(self)
+            painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+
+            w = self.crosshair.width()
+            h = self.crosshair.height()
+
+            win_center = self.rect().center()
+
+            rect = QRect(0, 0, w + 12, h + 12)
+            rect.moveCenter(win_center)
+
+            painter.setBrush(QColor(59, 130, 246, 25))
+            painter.setPen(Qt.PenStyle.NoPen)
+            painter.drawRoundedRect(rect, 4, 4)
+
+            pen = QPen()
+            pen.setColor(QColor(59, 130, 246, 200))
+            pen.setStyle(Qt.PenStyle.DashLine)
+            pen.setWidth(2)
+
+            painter.setBrush(Qt.BrushStyle.NoBrush)
+            painter.setPen(pen)
+            painter.drawRoundedRect(rect, 4, 4)
