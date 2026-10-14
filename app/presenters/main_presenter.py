@@ -47,8 +47,6 @@ class MainPresenter:
         self.ui.tray_icon.activated.connect(self.ui.show_tray_menu)
         QApplication.instance().aboutToQuit.connect(self.save_settings)
 
-        QTimer.singleShot(300, lambda: self.ui.crosshair.setVisible(True))
-
     def apply_crosshair_settings(self) -> None:
         """apply loaded config data at app init"""
         color = self.model.color
@@ -56,7 +54,7 @@ class MainPresenter:
         img = self.model.image
         opacity = self.model.opacity
 
-        self.ui.crosshair.setFixedSize(size, size)
+        self.ui.crosshair.set_style(size=size)
         log.debug(f'Set fixed size for crosshair: W: {size} H: {size}')
 
         if img and os.path.exists(img):

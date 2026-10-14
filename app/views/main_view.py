@@ -25,7 +25,6 @@ class MainView(QWidget):
 
     def setupUI(self) -> None:
         self.setWindowTitle("HolySight")
-        self.setWindowIcon(QIcon(":/holy_sight.png"))
         self.setFixedSize(500, 500)
         self.setObjectName("WIN_main")
 
@@ -45,7 +44,6 @@ class MainView(QWidget):
         self.crosshair = CrosshairWidget(self)
         self.crosshair.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.crosshair.setObjectName("crosshair")
-        self.crosshair.setVisible(False)
 
         main_layout.addWidget(self.crosshair, alignment=Qt.AlignmentFlag.AlignCenter)
 
@@ -66,7 +64,7 @@ class MainView(QWidget):
 
     @Slot(int)
     def update_crosshair_size(self, size: int) -> None:
-        self.crosshair.setFixedSize(size, size)
+        self.crosshair.set_style(size=size)
         self._set_visual_coord()
         self.update()
         log.debug(f"Update crosshair size: {size}")
