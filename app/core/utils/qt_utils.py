@@ -6,21 +6,6 @@ from PySide6.QtCore import QFile, QTextStream
 log = logging.getLogger(__name__)
 
 
-def reposition_window(window: QWidget, center: bool = True) -> None:
-    screen = QApplication.primaryScreen().availableGeometry()
-    frame = window.frameGeometry()
-
-    if center:
-        frame.moveCenter(screen.center())
-        window.move(frame.topLeft())
-    else:
-        # half right center
-        half_width = screen.width() // 2
-        x = screen.left() + half_width + (half_width - frame.width()) // 2
-        y = screen.top() + (screen.height() - frame.height()) // 2 - 60
-        window.move(x, y)
-
-
 def load_style(*paths: str) -> str:
     """
     :returns: combined stylesheet.

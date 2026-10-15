@@ -15,7 +15,7 @@ DEFAULT_CONFIG: Final[ConfigData] = {
     "ch_size": 20,
     "ch_opacity": 1.0,
     "ch_image": "",
-    "ch_pos": (99999, 99999)
+    "ch_pos": None
 }
 
 

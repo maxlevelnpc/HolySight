@@ -6,4 +6,4 @@ class ConfigData(TypedDict):
     ch_size: int
     ch_opacity: float
     ch_image: str
-    ch_pos: tuple[int, int]
+    ch_pos: tuple[int, int] | None

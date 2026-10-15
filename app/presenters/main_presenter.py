@@ -6,8 +6,6 @@ from typing import TYPE_CHECKING
 from PySide6.QtWidgets import QApplication
 from PySide6.QtCore import Slot, QTimer
 
-from app.core.utils import reposition_window
-
 
 if TYPE_CHECKING:
     from app.core.services.hotkey_service import HotkeyManager
@@ -41,7 +39,7 @@ class MainPresenter:
         self.model.visibilityChanged.connect(self.ui.update_crosshair_visibility)
         self.ui.windowPositionChanged.connect(lambda v: setattr(self.model, "pos", v))
         self.ui.returnPressed.connect(lambda v=False: setattr(self.model, "movable", v))
-        self.bus.centerMainWindow.connect(lambda: reposition_window(self.ui))
+        self.bus.centerMainWindow.connect(self.ui.center_and_update_visual_pos)
         self.ui.tray_crosshair_settings.triggered.connect(self.bus.showSettingsWindow)
         self.ui.tray_exit_app.triggered.connect(self.quit_app)
         self.ui.tray_icon.activated.connect(self.ui.show_tray_menu)
@@ -57,9 +55,13 @@ class MainPresenter:
         self.ui.crosshair.set_style(size=size)
         log.debug(f'Set fixed size for crosshair: W: {size} H: {size}')
 
-        if img and os.path.exists(img):
-            self.ui.set_crosshair_img(img)
-            log.debug(f"Image exist. Set custom image: `{os.path.basename(img)}`")
+        if img:
+            if os.path.exists(img):
+                self.ui.set_crosshair_img(img)
+                log.debug(f"Image exist. Set custom image: `{os.path.basename(img)}`")
+            else:
+                self.ui.set_crosshair_color(color)
+                log.debug(f"Image path exist but the file is missing `{img}`. Set crosshair Color: `{color}`")
         else:
             self.ui.set_crosshair_color(color)
             log.debug(f"Set crosshair Color: {color}")
@@ -84,20 +86,15 @@ class MainPresenter:
 
     def reposition_crosshair(self) -> None:
         """Move crosshair to saved coord pos or center it"""
-        INVALID_POS = 99999
-        center_x, center_y = self.model.pos
-
-        # Detect first-run or invalid saved position using sentinel values.
-        # If detected, center the window instead of restoring coordinates.
-        if center_x >= INVALID_POS or center_y >= INVALID_POS:
-            screen_center = self.ui.get_screen_center()
-            self.ui.move(*screen_center)
+        if self.model.pos is None:
+            self.ui.center_crosshair()
             # update crosshair pos in model
             self.model.pos = self.ui.get_crosshair_pos()
             return
 
-        x, y = self.ui.get_window_pos((center_x, center_y))
-        self.ui.move(x, y)
+        x, y = self.model.pos
+        win_pos = self.ui.get_window_pos((x, y))
+        self.ui.move(*win_pos)
 
     @Slot()
     def quit_app(self) -> None:

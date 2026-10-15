@@ -1,4 +1,7 @@
+from typing import Optional
+
 from PySide6.QtCore import Signal, QObject
+
 from app.core.services import ConfigService
 
 
@@ -20,7 +23,7 @@ class CrosshairModel(QObject):
         self._size: int
         self._opacity: float
         self._image: str
-        self._pos: tuple
+        self._pos: Optional[tuple[int, int]]
 
         self._is_movable: bool = False
         self._is_hidden: bool = False
@@ -31,7 +34,7 @@ class CrosshairModel(QObject):
         self._size = config_data["ch_size"]
         self._opacity = config_data["ch_opacity"]
         self._image = config_data["ch_image"]
-        self._pos = tuple(config_data["ch_pos"])
+        self._pos = config_data["ch_pos"]
 
     @property
     def color(self) -> str:
@@ -71,11 +74,11 @@ class CrosshairModel(QObject):
         self.imageChanged.emit(image)
 
     @property
-    def pos(self) -> tuple[int, int]:
+    def pos(self) -> tuple[int, int] | None:
         return self._pos
 
     @pos.setter
-    def pos(self, pos: tuple[int, int]) -> None:
+    def pos(self, pos: tuple[int, int] | None) -> None:
         self._pos = pos
         self.positionChanged.emit(pos)
 

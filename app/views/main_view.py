@@ -123,9 +123,17 @@ class MainView(QWidget):
         frame.moveCenter(screen.center())
         return cast(tuple[int, int], frame.topLeft().toTuple())
 
+    def center_crosshair(self) -> None:
+        pos = self.get_screen_center()
+        self.move(*pos)
+
     def update_visual_crosshair_pos(self) -> None:
         pos = self.get_crosshair_pos()
         self.windowPositionChanged.emit(pos)
+
+    def center_and_update_visual_pos(self) -> None:
+        self.center_crosshair()
+        self.update_visual_crosshair_pos()
 
     # ----------------------------------------------------------------------------
 
@@ -147,9 +155,7 @@ class MainView(QWidget):
         super().mouseDoubleClickEvent(event)
         if self.crosshair.geometry().contains(event.position().toPoint()):
             # center the overlay window
-            screen_center = self.get_screen_center()
-            self.move(*screen_center)
-            self.update_visual_crosshair_pos()
+            self.center_and_update_visual_pos()
 
     def keyPressEvent(self, event) -> None:
         super().keyPressEvent(event)
