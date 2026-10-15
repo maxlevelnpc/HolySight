@@ -47,7 +47,13 @@ class SettingsPresenter:
 
         self.apply_settings()
 
-        self.ui.apply_shadow(self.ui.color_preview, color=self.model.color, blur=30)
+        color = (
+            "#121314"
+            if self.model.image and os.path.exists(self.model.image)
+            else self.model.color
+        )
+        self.ui.apply_shadow(self.ui.color_preview, color=color, blur=30)
+
         self.ui.apply_shadow(self.ui.move_crosshair, offset=(0, 2))
         self.ui.apply_shadow(self.ui.hide_btn, offset=(0, 2))
         self.ui.apply_shadow(self.ui.image_preview, color="#0e9ae0", blur=30)

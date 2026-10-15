@@ -1,10 +1,10 @@
 from __future__ import annotations
 import logging
 
-from PySide6.QtGui import QIcon, QColor
+from PySide6.QtGui import QColor
 from PySide6.QtCore import Qt, Slot, Signal
 from PySide6.QtWidgets import (
-    QFormLayout, QVBoxLayout, QHBoxLayout, QLabel, QWidget, QPushButton, QMessageBox, QGraphicsDropShadowEffect
+    QFormLayout, QVBoxLayout, QHBoxLayout, QLabel, QWidget, QPushButton, QGraphicsDropShadowEffect
 )
 
 from app.widgets import Slider, ImageDropButton
@@ -23,7 +23,6 @@ class SettingsView(QWidget):
 
     def setupUI(self) -> None:
         self.setWindowTitle(" ")
-        self.setWindowIcon(QIcon(":/holy_sight.png"))
         self.setFixedSize(200, 350)
         self.setObjectName("WIN_settings")
         self.setWindowFlag(Qt.WindowType.WindowStaysOnTopHint)
