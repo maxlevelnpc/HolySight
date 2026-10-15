@@ -1,12 +1,11 @@
 from __future__ import annotations
 import logging
-from typing import Optional
+from typing import Optional, cast
 
-from PySide6.QtWidgets import QSystemTrayIcon, QVBoxLayout, QMenu, QWidget
+from PySide6.QtWidgets import QApplication, QSystemTrayIcon, QVBoxLayout, QMenu, QWidget
 from PySide6.QtGui import QIcon, QAction, QCursor, QPainter, QPen, QColor
 from PySide6.QtCore import Qt, QPoint, Slot, Signal, QRect
 
-from app.core.utils import reposition_window
 from app.widgets import CrosshairWidget
 
 log = logging.getLogger(__name__)
@@ -65,7 +64,7 @@ class MainView(QWidget):
     @Slot(int)
     def update_crosshair_size(self, size: int) -> None:
         self.crosshair.set_style(size=size)
-        self._set_visual_coord()
+        self.update_visual_crosshair_pos()
         self.update()
         log.debug(f"Update crosshair size: {size}")
 
@@ -106,15 +105,27 @@ class MainView(QWidget):
         if reason == QSystemTrayIcon.ActivationReason.Trigger:
             self.tray_menu.popup(QCursor.pos())
 
-    def _window_pos_as_crosshair(self) -> tuple[int, int]:
-        center_x = self.pos().x() + (self.size().width() // 2)
-        center_y = self.pos().y() + (self.size().height() // 2)
+    def get_crosshair_pos(self) -> tuple[int, int]:
+        center = QPoint(self.width() // 2, self.height() // 2)
+        point = self.mapToGlobal(center)
+        return point.x(), point.y()
 
-        return center_x, center_y
+    def get_window_pos(self, center_pos: tuple[int, int]) -> tuple[int, int]:
+        """:returns: tuple. window pos (top-left)"""
+        frame = self.frameGeometry()
+        frame.moveCenter(QPoint(*center_pos))
+        return cast(tuple[int, int], frame.topLeft().toTuple())
 
-    def _set_visual_coord(self) -> None:
-        rpos = self._window_pos_as_crosshair()
-        self.windowPositionChanged.emit(rpos)
+    def get_screen_center(self) -> tuple[int, int]:
+        screen = QApplication.primaryScreen().availableGeometry()
+        frame = self.frameGeometry()
+
+        frame.moveCenter(screen.center())
+        return cast(tuple[int, int], frame.topLeft().toTuple())
+
+    def update_visual_crosshair_pos(self) -> None:
+        pos = self.get_crosshair_pos()
+        self.windowPositionChanged.emit(pos)
 
     # ----------------------------------------------------------------------------
 
@@ -130,14 +141,15 @@ class MainView(QWidget):
         if event.buttons() & Qt.MouseButton.LeftButton and self.drag_pos is not None:
             # allow to move window by dragging crosshair widget
             self.move(event.globalPosition().toPoint() - self.drag_pos)
-            self._set_visual_coord()
+            self.update_visual_crosshair_pos()
 
     def mouseDoubleClickEvent(self, event) -> None:
         super().mouseDoubleClickEvent(event)
         if self.crosshair.geometry().contains(event.position().toPoint()):
             # center the overlay window
-            reposition_window(self, True)
-            self._set_visual_coord()
+            screen_center = self.get_screen_center()
+            self.move(*screen_center)
+            self.update_visual_crosshair_pos()
 
     def keyPressEvent(self, event) -> None:
         super().keyPressEvent(event)
@@ -151,16 +163,16 @@ class MainView(QWidget):
         # move window with arrow keys
         if event.key() == Qt.Key.Key_Left:
             self.move(pos - QPoint(step, 0))
-            self._set_visual_coord()
+            self.update_visual_crosshair_pos()
         elif event.key() == Qt.Key.Key_Up:
             self.move(pos - QPoint(0, step))
-            self._set_visual_coord()
+            self.update_visual_crosshair_pos()
         elif event.key() == Qt.Key.Key_Right:
             self.move(pos + QPoint(step, 0))
-            self._set_visual_coord()
+            self.update_visual_crosshair_pos()
         elif event.key() == Qt.Key.Key_Down:
             self.move(pos + QPoint(0, step))
-            self._set_visual_coord()
+            self.update_visual_crosshair_pos()
 
     def paintEvent(self, event) -> None:
         super().paintEvent(event)

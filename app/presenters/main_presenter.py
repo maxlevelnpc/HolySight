@@ -78,26 +78,26 @@ class MainPresenter:
             "ch_size": self.model.size,
             "ch_opacity": self.model.opacity,
             "ch_image": self.model.image,
-            # the saved values is window pos (top left)
-            "ch_pos": self.ui.pos().toTuple()
+            "ch_pos": self.model.pos
         }
         self.model.service.save_config_data(config_data)
 
     def reposition_crosshair(self) -> None:
         """Move crosshair to saved coord pos or center it"""
         INVALID_POS = 99999
-        x, y = self.model.pos
+        center_x, center_y = self.model.pos
 
         # Detect first-run or invalid saved position using sentinel values.
         # If detected, center the window instead of restoring coordinates.
-        if x >= INVALID_POS or y >= INVALID_POS:
-            reposition_window(self.ui, True)
-        else:
-            self.ui.move(x, y)
+        if center_x >= INVALID_POS or center_y >= INVALID_POS:
+            screen_center = self.ui.get_screen_center()
+            self.ui.move(*screen_center)
+            # update crosshair pos in model
+            self.model.pos = self.ui.get_crosshair_pos()
+            return
 
-        # self.model.pos is window pos, get the center pos and update pos in model
-        pos = self.ui._window_pos_as_crosshair()
-        self.model.pos = pos
+        x, y = self.ui.get_window_pos((center_x, center_y))
+        self.ui.move(x, y)
 
     @Slot()
     def quit_app(self) -> None:
