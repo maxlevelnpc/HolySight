@@ -2,7 +2,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 import logging
 
-from pynput import keyboard
+from pynput import keyboard, mouse
 from PySide6.QtCore import QObject
 
 if TYPE_CHECKING:
@@ -26,6 +26,9 @@ class HotkeyManager(QObject):
         })
         self.listener.start()
 
+        self.mouse_listener = mouse.Listener(on_click=self.on_mouse_click)
+        self.mouse_listener.start()
+
     def toggle_visibility(self) -> None:
         self.bus.globalVisibilityChanged.emit()
 
@@ -35,6 +38,11 @@ class HotkeyManager(QObject):
     def show_settings(self) -> None:
         self.bus.showSettingsWindow.emit()
 
+    def on_mouse_click(self, x: int, y: int, button: mouse.Button, pressed: bool) -> None:
+        if button == mouse.Button.right:
+            self.bus.rightMouseButtonStateChanged.emit(pressed)
+
     def stop(self) -> None:
         log.debug("LISTENER STOPPED.")
         self.listener.stop()
+        self.mouse_listener.stop()

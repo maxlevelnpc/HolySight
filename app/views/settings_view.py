@@ -1,8 +1,8 @@
 from __future__ import annotations
 import logging
 
-from PySide6.QtGui import QColor
-from PySide6.QtCore import Qt, Slot, Signal
+from PySide6.QtGui import QColor, QIcon
+from PySide6.QtCore import Qt, Slot, Signal, QSize
 from PySide6.QtWidgets import (
     QFormLayout, QVBoxLayout, QHBoxLayout, QLabel, QWidget, QPushButton, QGraphicsDropShadowEffect
 )
@@ -23,7 +23,7 @@ class SettingsView(QWidget):
 
     def setupUI(self) -> None:
         self.setWindowTitle(" ")
-        self.setFixedSize(200, 350)
+        self.setFixedSize(200, 360)
         self.setObjectName("WIN_settings")
         self.setWindowFlag(Qt.WindowType.WindowStaysOnTopHint)
 
@@ -32,9 +32,20 @@ class SettingsView(QWidget):
 
         # ----------------------------------------------------------------------------
 
+        coord_layout = QHBoxLayout()
+        coord_layout.setSpacing(0)
+
         self.crosshair_coord = QLabel()
         self.crosshair_coord.setObjectName("infoLabel")
         self.crosshair_coord.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        self.preferences_btn = QPushButton()
+        self.preferences_btn.setIcon(QIcon(":/settings.png"))
+        self.preferences_btn.setIconSize(QSize(24, 24))
+        self.preferences_btn.setFlat(True)
+
+        coord_layout.addWidget(self.crosshair_coord, stretch=2)
+        coord_layout.addWidget(self.preferences_btn)
 
         color_layout = QHBoxLayout()
         color_layout.setSpacing(0)
@@ -76,7 +87,7 @@ class SettingsView(QWidget):
         )
         self.info_label.setText(self.shortcuts_info)
 
-        self.main_layout.addWidget(self.crosshair_coord)
+        self.main_layout.addLayout(coord_layout)
         self.main_layout.addSpacing(6)
         self.main_layout.addLayout(color_layout)
         self.main_layout.addLayout(self.crosshair_form_layout)

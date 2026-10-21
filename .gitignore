@@ -19,6 +19,7 @@ Thumbs.db
 *.dist/
 .scripts/
 .tools/
+*_rc.py
 quicknotes.*
 demo.py
 test.py

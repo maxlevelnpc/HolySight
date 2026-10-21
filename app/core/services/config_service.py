@@ -5,17 +5,20 @@ from pathlib import Path
 
 from PySide6.QtCore import QStandardPaths
 
-from app.core.types import ConfigData
 
 log = logging.getLogger(__name__)
 
-
-DEFAULT_CONFIG: Final[ConfigData] = {
-    "ch_color": "#ff0000",
-    "ch_size": 20,
-    "ch_opacity": 1.0,
-    "ch_image": "",
-    "ch_pos": None
+DEFAULT_CONFIG: Final[dict] = {
+    "crosshair_data": {
+        "ch_color": "#ff3636",
+        "ch_size": 20,
+        "ch_opacity": 1.0,
+        "ch_image": "",
+        "ch_pos": None,
+    },
+    "additional_settings": {
+        "hide_on_rmb": None
+    }
 }
 
 
@@ -25,7 +28,7 @@ class ConfigService:
         cfg_dir.mkdir(parents=True, exist_ok=True)
         self.cfg_path = cfg_dir / "settings.json"
 
-    def load_config_data(self) -> ConfigData:
+    def load_config_data(self) -> dict:
         if not self.cfg_path.exists():
             return DEFAULT_CONFIG.copy()
 
@@ -37,7 +40,7 @@ class ConfigService:
             log.error(f"Failed to load settings: {e}")
             return DEFAULT_CONFIG.copy()
 
-    def save_config_data(self, config_data: ConfigData) -> None:
+    def save_config_data(self, config_data: dict) -> None:
         try:
             with self.cfg_path.open("w", encoding="utf-8") as f:
                 json.dump(config_data, f, indent=4)

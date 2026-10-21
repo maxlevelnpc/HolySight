@@ -31,7 +31,7 @@ if __name__ == '__main__':
     app.setQuitOnLastWindowClosed(False)
     app.setWindowIcon(QIcon(":/holy_sight.png"))
 
-    stylesheet = load_style(":/styles.css")
+    stylesheet = load_style("app/assets/styles/styles.css")
     app.setStyleSheet(stylesheet)
 
     service = ConfigService()

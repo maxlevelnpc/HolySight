@@ -3,11 +3,13 @@ import logging
 import os
 from typing import TYPE_CHECKING
 
-from PySide6.QtWidgets import QFileDialog, QColorDialog
+from PySide6.QtWidgets import QFileDialog, QColorDialog, QDialog
 from PySide6.QtGui import Qt, QIcon
 from PySide6.QtCore import Slot
 
 from app.core.constants import SUPPORTED_EXTS
+from app.core.types import ADSType
+from app.widgets import PreferencesDialog
 
 if TYPE_CHECKING:
     from app.core.bus import AppBus
@@ -38,14 +40,17 @@ class SettingsPresenter:
         self.model.positionChanged.connect(self.ui.update_visual_coord)
         self.model.moveModeChanged.connect(self.ui.on_crosshair_move_mode_changed)
         self.model.imageChanged.connect(self.on_crosshair_img_changed)
-        self.bus.globalVisibilityChanged.connect(self.request_update_crosshair_visibility)
-        self.ui.move_crosshair.clicked.connect(lambda checked=False, disable=False: self.request_update_crosshair_move_state(disable))
-        self.ui.windowClosed.connect(lambda checked=False, disable=True: self.request_update_crosshair_move_state(disable))
-        self.ui.returnPressed.connect(lambda checked=False, disable=True: self.request_update_crosshair_move_state(disable))
-        self.ui.hide_btn.clicked.connect(self.request_update_crosshair_visibility)
+        self.model.visibilityChanged.connect(self.update_visibility_btn_text)
+        self.bus.globalVisibilityChanged.connect(self.update_visibility_attr)
+        self.ui.move_crosshair.clicked.connect(lambda c, v=False: self.request_update_crosshair_move_state(v))
+        self.ui.windowClosed.connect(lambda v=True: self.request_update_crosshair_move_state(v))
+        self.ui.returnPressed.connect(lambda v=True: self.request_update_crosshair_move_state(v))
+        self.ui.hide_btn.clicked.connect(self.update_visibility_attr)
         self.bus.showSettingsWindow.connect(self.ui.show_window)
+        self.ui.preferences_btn.clicked.connect(self.show_preferences_dialog)
 
         self.apply_settings()
+        self.update_visibility_btn_state()
 
         color = (
             "#121314"
@@ -106,6 +111,7 @@ class SettingsPresenter:
 
             # update attr and tell main window to reset crosshair img
             self.model.image = ""
+            self.model.color = self.model.color
             return
 
         spaced_exts = " ".join(f"*.{ext}" for ext in SUPPORTED_EXTS)
@@ -121,15 +127,18 @@ class SettingsPresenter:
             self.model.image = img
 
     @Slot()
-    def request_update_crosshair_visibility(self) -> None:
-        hidden = self.model.hidden
+    def update_visibility_btn_text(self, hidden: bool) -> None:
         b = self.ui.hide_btn
-        b.setText("Hide") if hidden else b.setText("Show")
+        b.setText("Show") if hidden else b.setText("Hide")
 
-        # update attr and tell main window to update crosshair visibility
-        self.model.hidden = not hidden
+    def update_visibility_btn_state(self) -> None:
+        if self.model.hide_on_rmb == ADSType.HOLD:
+            self.ui.hide_btn.setDisabled(True)
+        else:
+            self.ui.hide_btn.setEnabled(True)
 
-        log.debug(f"Crosshair is now visible: {hidden}")
+    def update_visibility_attr(self) -> None:
+        self.model.hidden = not self.model.hidden
 
     def reset_crosshair_img_preview(self) -> None:
         self.ui.image_preview.setIcon(QIcon())
@@ -152,3 +161,17 @@ class SettingsPresenter:
 
     def on_crosshair_img_changed(self, img: str) -> None:
         self.set_crosshair_img_preview(img) if img else self.reset_crosshair_img_preview()
+
+    def show_preferences_dialog(self) -> None:
+        data = {
+            "rmb": self.model.hide_on_rmb
+        }
+
+        self.preferences = PreferencesDialog(data, self.ui)
+        result = self.preferences.exec()
+
+        if result == QDialog.DialogCode.Accepted:
+            data = self.preferences.get_additional_settings()
+            self.bus.preferencesChanged.emit(data)
+
+            self.update_visibility_btn_state()

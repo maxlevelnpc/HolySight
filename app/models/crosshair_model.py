@@ -3,6 +3,7 @@ from typing import Optional
 from PySide6.QtCore import Signal, QObject
 
 from app.core.services import ConfigService
+from app.core.types import ADSType
 
 
 class CrosshairModel(QObject):
@@ -28,13 +29,22 @@ class CrosshairModel(QObject):
         self._is_movable: bool = False
         self._is_hidden: bool = False
 
+        # additional settings
+        self.hide_on_rmb: Optional[ADSType]  # None == dont hide / do nothing
+
     def load_config(self) -> None:
         config_data = self.service.load_config_data()
-        self._color = config_data["ch_color"]
-        self._size = config_data["ch_size"]
-        self._opacity = config_data["ch_opacity"]
-        self._image = config_data["ch_image"]
-        self._pos = config_data["ch_pos"]
+        crosshair = config_data["crosshair_data"]
+        settings = config_data["additional_settings"]
+
+        self._color = crosshair["ch_color"]
+        self._size = crosshair["ch_size"]
+        self._opacity = crosshair["ch_opacity"]
+        self._image = crosshair["ch_image"]
+        self._pos = crosshair["ch_pos"]
+
+        hide_on_rmb = settings["hide_on_rmb"]
+        self.hide_on_rmb = hide_on_rmb and ADSType(hide_on_rmb)
 
     @property
     def color(self) -> str:

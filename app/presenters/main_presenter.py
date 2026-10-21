@@ -4,7 +4,9 @@ import logging
 from typing import TYPE_CHECKING
 
 from PySide6.QtWidgets import QApplication
-from PySide6.QtCore import Slot, QTimer
+from PySide6.QtCore import Slot
+
+from app.core.types import ADSType
 
 
 if TYPE_CHECKING:
@@ -40,6 +42,8 @@ class MainPresenter:
         self.ui.windowPositionChanged.connect(lambda v: setattr(self.model, "pos", v))
         self.ui.returnPressed.connect(lambda v=False: setattr(self.model, "movable", v))
         self.bus.centerMainWindow.connect(self.ui.center_and_update_visual_pos)
+        self.bus.rightMouseButtonStateChanged.connect(self.hide_crosshair_on_rmb)
+        self.bus.preferencesChanged.connect(self.update_additional_settings)
         self.ui.tray_crosshair_settings.triggered.connect(self.bus.showSettingsWindow)
         self.ui.tray_exit_app.triggered.connect(self.quit_app)
         self.ui.tray_icon.activated.connect(self.ui.show_tray_menu)
@@ -76,12 +80,18 @@ class MainPresenter:
     def save_settings(self) -> None:
         """Save current settings at exit"""
         config_data = {
-            "ch_color": self.model.color,
-            "ch_size": self.model.size,
-            "ch_opacity": self.model.opacity,
-            "ch_image": self.model.image,
-            "ch_pos": self.model.pos
+            "crosshair_data": {
+                "ch_color": self.model.color,
+                "ch_size": self.model.size,
+                "ch_opacity": self.model.opacity,
+                "ch_image": self.model.image,
+                "ch_pos": self.model.pos,
+            },
+            "additional_settings": {
+                "hide_on_rmb": self.model.hide_on_rmb and self.model.hide_on_rmb.value
+            }
         }
+
         self.model.service.save_config_data(config_data)
 
     def reposition_crosshair(self) -> None:
@@ -95,6 +105,22 @@ class MainPresenter:
         x, y = self.model.pos
         win_pos = self.ui.get_window_pos((x, y))
         self.ui.move(*win_pos)
+
+    def update_additional_settings(self, data: dict) -> None:
+        rmb = data.get("rmb")
+
+        self.model.hide_on_rmb = rmb
+        # init state must be shown for HODL
+        if self.model.hidden and rmb == ADSType.HOLD:
+            self.model.hidden = False
+
+    def hide_crosshair_on_rmb(self, pressed: bool) -> None:
+        if self.model.hide_on_rmb == ADSType.TOGGLE:
+            if not pressed:  # on clicked
+                self.model.hidden = not self.model.hidden
+
+        elif self.model.hide_on_rmb == ADSType.HOLD:
+            self.model.hidden = pressed
 
     @Slot()
     def quit_app(self) -> None:
