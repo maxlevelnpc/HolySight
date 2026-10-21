@@ -39,6 +39,12 @@ QPushButton:hover {
 QPushButton:disabled {
     color: #a7a7a7;
 }
+QPushButton:flat {
+    background-color: transparent;
+}
+QPushButton:flat:hover {
+    background-color: #262b3d;
+}
 
 QPushButton#colorPickerBtn {
     color: #000000;
@@ -56,6 +62,7 @@ QPushButton#setImageBtn:hover {
     background-color: #2b3144;
 }
 
+
 QLabel {
     background: transparent;
     font-size: 11px;
@@ -63,6 +70,11 @@ QLabel {
 QLabel#infoLabel {
     background: transparent;
     font-size: 16px;
+}
+QLabel#sectionTitleLabel {
+    color: #0f90f3;
+    font-weight: bold;
+    font-size: 12px;
 }
 
 
@@ -132,26 +144,45 @@ QSlider::groove:horizontal, QSlider::sub-page:horizontal, QSlider::add-page:hori
     border-radius: 2px;
 }
 QSlider::handle:horizontal {
-    background-color: #0078d4; /* Primary Cyan */
+    background-color: #0078d4;
     border: none;
     border-radius: 7px;
     width: 14px;
     height: 14px;
 }
 QSlider::handle:horizontal:hover {
-    background-color: #0f90f3; /* Lighter Cyan highlight on hover */
+    background-color: #0f90f3;
 }
 QSlider:horizontal {
     height: 18px;
 }
 QSlider::groove:horizontal, QSlider::add-page:horizontal {
-    background-color: #E4E4E7; /* Subtle light gray for the unfilled track */
-    height: 4px; /* Track grows sideways */
+    background-color: #E4E4E7;
+    height: 4px;
 }
 QSlider::sub-page:horizontal {
-    background-color: #0f90f3; /* Primary Cyan for the filled track (left side) */
+    background-color: #0f90f3;
 }
 QSlider::handle:horizontal {
-    margin: -5px 0px; /* Vertically centers the handle on a horizontal line */
+    margin: -5px 0px;
 }
 
+
+QRadioButton {
+    color: #FFFFFF;
+    spacing: 8px;
+    background: transparent;
+}
+QRadioButton::indicator {
+    width: 16px;
+    height: 16px;
+    image: url(":/unchecked.png");
+
+}
+QRadioButton:hover {
+    color: #0f90f3;
+}
+QRadioButton::indicator:checked {
+    border: none;
+    image: url(":/checked.png");
+}
